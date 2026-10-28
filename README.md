@@ -12,7 +12,7 @@ Le script rejoue un workshop d'initiation à Hive (bases et tables, partitions e
 python3 hive_workshop.py            # ouvre l'interface sur http://localhost:8765
 ```
 
-Le script lit les fichiers de données du workshop dans un dossier `donnees/`, placé à côté du script ou dans le dossier parent. On peut aussi lui indiquer un autre dossier avec `--donnees CHEMIN`. Les fichiers attendus :
+Les fichiers de données du workshop sont dans `donnees/` : le script les trouve tout seul. Pour en utiliser d'autres : `--donnees CHEMIN`. Les fichiers :
 
 | Fichier | Contenu | Séparateur | En-tête |
 |---|---|---|---|
@@ -23,7 +23,7 @@ Le script lit les fichiers de données du workshop dans un dossier `donnees/`, p
 | `fonction_employes.txt` | id_empl ; année d'embauche ; fonction | `;` | oui |
 | `salaire_employes.txt` | sexe ; secteur ; salaire (`20000euro/an`) ; code postal ; id_empl | `;` | oui |
 
-Ces données sont fournies en séance et ne font pas partie du dépôt.
+Les fichiers ont des fins de ligne Windows (CRLF) et quelques accents en Latin-1, que Hive affiche « � » : c'est voulu, le script reproduit ce comportement.
 
 ## Commandes
 
@@ -61,10 +61,10 @@ Les requêtes sont traduites puis exécutées par SQLite. La distribution, MapRe
 
 ## Corrections
 
-Le dépôt ne contient pas les corrections. Si un fichier `corriges.py` est placé à côté du script, l'interface passe en mode tuteur et affiche alors :
-- les solutions ;
-- le corrigé d'origine du sujet ;
-- les résultats attendus ;
-- une version en Python pur de chaque question.
+`corriges.py` contient les solutions, le corrigé d'origine du sujet (2023), les résultats attendus et une version en Python pur de chaque question. Quand il est présent à côté du script, l'interface est en mode tuteur. Pour une version élèves :
 
-Sans ce fichier, l'interface est en mode élèves.
+```bash
+python3 hive_workshop.py serve --sans-corriges
+```
+
+Pour qu'il n'y ait vraiment aucune réponse, distribuez `hive_workshop.py` sans `corriges.py`.
