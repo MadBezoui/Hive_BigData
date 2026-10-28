@@ -1,0 +1,9 @@
+# HDFS simulé et Metastore créés à l'exécution
+mini_hdfs/
+# Corrections du tuteur : à garder hors du dépôt public
+corriges.py
+# Fichiers de données distribués en séance
+donnees/
+__pycache__/
+*.pyc
+.DS_Store
