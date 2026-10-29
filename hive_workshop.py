@@ -2142,6 +2142,15 @@ import socketserver
 import urllib.parse
 
 
+def interface_html():
+    """interface/index.html s'il existe à côté du script (modifiable à chaud), sinon la copie intégrée."""
+    p = os.path.join(os.path.dirname(os.path.abspath(__file__)), "interface", "index.html")
+    if os.path.isfile(p):
+        with open(p, encoding="utf-8") as fh:
+            return fh.read()
+    return INDEX_HTML
+
+
 def display(r):
     """Formate les valeurs comme Hive les affiche (NULL, 38.0, décimales lisibles)."""
     if r.get("kind") == "table":
@@ -2179,7 +2188,7 @@ def make_handler(engine, student_mode):
             u = urllib.parse.urlparse(self.path)
             q = urllib.parse.parse_qs(u.query)
             if u.path in ("/", "/index.html"):
-                return self._send(200, INDEX_HTML, "text/html; charset=utf-8")
+                return self._send(200, interface_html(), "text/html; charset=utf-8")
             if u.path == "/api/state":
                 return self._json({"hdfs": engine.hdfs_tree(), "meta": engine.metastore_view()})
             if u.path == "/api/content":

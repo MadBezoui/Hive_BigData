@@ -25,6 +25,10 @@ Les fichiers de données du workshop sont dans `donnees/` : le script les trouve
 
 Les fichiers ont des fins de ligne Windows (CRLF) et quelques accents en Latin-1, que Hive affiche « � » : c'est voulu, le script reproduit ce comportement.
 
+## L'interface web
+
+Le fichier [`interface/index.html`](interface/index.html) contient toute l'interface : HTML, CSS et JavaScript, sans dépendance externe. Le script le sert sur http://localhost:8765 et le relit à chaque chargement de page. On peut donc le modifier et voir le résultat en rafraîchissant le navigateur. Si le dossier `interface/` est absent, le script utilise la copie intégrée dans `hive_workshop.py` : le script seul reste autonome.
+
 ## Commandes
 
 | Commande | Effet |

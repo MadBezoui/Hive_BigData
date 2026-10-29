@@ -1,0 +1,405 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mini-Hive · Workshop Hive</title>
+<style>
+:root{
+  --bg:#f6f5f1; --panel:#ffffff; --soft:#efede6; --line:#e2dfd5; --ink:#1d1d1b; --ink2:#4a4a46; --grey:#7a7a74;
+  --yellow:#fee131; --yellow-soft:#fff6c2; --red:#c2410c; --red-soft:#fdece3; --teal:#0f766e; --teal-soft:#e3f3f0;
+  --blue:#1d4ed8; --code-bg:#1e1f22; --code-ink:#e8e6e3; --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#141413; --panel:#1d1d1b; --soft:#262624; --line:#34342f; --ink:#f1efe8; --ink2:#c9c6bc; --grey:#9a978d;
+    --yellow-soft:#3a3412; --red-soft:#3a1e14; --teal-soft:#12302c; --code-bg:#0f0f0e; }
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+button{font:inherit;cursor:pointer}
+#toggleAside,#toggleNav{display:none}
+header{height:56px;display:flex;align-items:center;gap:14px;padding:0 18px;background:#1d1d1b;color:#fff;position:sticky;top:0;z-index:5}
+header .logo{display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:.2px}
+header .logo span.b{background:var(--yellow);color:#1d1d1b;border-radius:6px;padding:2px 8px;font-size:13px}
+header .sp{flex:1}
+header .db{font-family:var(--mono);font-size:13px;background:#2c2c29;border-radius:999px;padding:4px 12px}
+header .db b{color:var(--yellow)}
+header .mode{font-size:12px;border:1px solid #555;border-radius:999px;padding:3px 10px;color:#ddd}
+.hbtn{background:transparent;border:1px solid #555;color:#eee;border-radius:8px;padding:5px 12px;font-size:13px}
+.hbtn:hover{border-color:var(--yellow);color:var(--yellow)}
+.layout{display:grid;grid-template-columns:250px minmax(0,1fr) 340px;height:calc(100vh - 56px)}
+nav{border-right:1px solid var(--line);overflow:auto;padding:14px 10px 40px;background:var(--panel)}
+nav h4{font-size:11px;letter-spacing:.8px;text-transform:uppercase;color:var(--grey);margin:16px 8px 6px}
+nav a{display:flex;gap:8px;align-items:baseline;padding:6px 8px;border-radius:8px;color:var(--ink2);text-decoration:none;font-size:14px}
+nav a:hover{background:var(--soft)}
+nav a.on{background:var(--yellow);color:#1d1d1b;font-weight:600}
+nav a .id{font-family:var(--mono);font-size:12px;color:var(--grey);min-width:30px}
+nav a.on .id{color:#1d1d1b}
+nav a .ok{margin-left:auto;color:var(--teal);font-size:12px}
+main{overflow:auto;padding:26px 34px 80px}
+aside{border-left:1px solid var(--line);overflow:auto;background:var(--panel);display:flex;flex-direction:column}
+.kicker{display:inline-block;background:var(--yellow);color:#1d1d1b;font-size:11px;font-weight:700;letter-spacing:.8px;border-radius:999px;padding:3px 12px;text-transform:uppercase}
+.kicker.dark{background:#1d1d1b;color:var(--yellow)}
+h1{font-size:28px;line-height:1.2;margin:12px 0 10px}
+.lead{color:var(--ink2);max-width:860px;margin:0 0 14px}
+.watch{background:var(--teal-soft);border-radius:12px;padding:10px 16px;margin:14px 0;max-width:860px}
+.watch b{font-size:13px;color:var(--teal)}
+.watch ul{margin:4px 0 2px 18px;padding:0}
+.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:16px 0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.card h5{margin:0 0 6px;font-size:13px}
+.card ul{margin:0;padding-left:18px}
+.card.hint{background:var(--yellow-soft);border-color:transparent}
+.card.hint .blur{filter:blur(5px);cursor:pointer;transition:filter .2s}
+.card.hint .blur.show{filter:none}
+.qbig{display:flex;gap:16px;align-items:center;margin:8px 0 6px}
+.qbig .q{width:64px;height:64px;border-radius:50%;background:var(--yellow);color:#1d1d1b;display:grid;place-items:center;font-weight:800;font-size:22px;flex:none}
+.qbig p{font-size:20px;margin:0}
+.editor{margin:16px 0 8px;border-radius:12px;overflow:hidden;border:1px solid var(--line);background:var(--code-bg)}
+.editor .bar{display:flex;gap:8px;align-items:center;padding:8px 10px;background:#2a2b2e;color:#bbb;font-size:12px;flex-wrap:wrap}
+.editor .bar .t{font-family:var(--mono);margin-right:auto}
+textarea{display:block;width:100%;min-height:120px;resize:vertical;border:0;outline:0;background:var(--code-bg);color:var(--code-ink);font:14px/1.55 var(--mono);padding:14px 16px;tab-size:2}
+.btn{border:0;border-radius:8px;padding:6px 14px;font-size:13px;font-weight:600}
+.btn.run{background:var(--yellow);color:#1d1d1b}
+.btn.ghost{background:transparent;color:#ddd;border:1px solid #555}
+.btn.ghost:hover{border-color:var(--yellow);color:var(--yellow)}
+.btn.light{background:var(--soft);color:var(--ink);border:1px solid var(--line)}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:10px 0}
+.expected{background:var(--teal-soft);border-left:4px solid var(--teal);border-radius:8px;padding:10px 14px;margin:10px 0;max-width:900px}
+.expected.subject{background:var(--red-soft);border-left-color:var(--red)}
+.results{display:flex;flex-direction:column;gap:12px;margin-top:12px}
+.res{background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.res .h{font-family:var(--mono);font-size:12px;color:var(--grey);padding:7px 12px;background:var(--soft);display:flex;gap:10px;white-space:nowrap;overflow:hidden}
+.res .h span.s{overflow:hidden;text-overflow:ellipsis;flex:1}
+.res pre{margin:0;padding:10px 14px;font:13px/1.5 var(--mono);white-space:pre-wrap;word-break:break-word}
+.res.err{border-color:var(--red)}
+.res.err pre{background:var(--red-soft);color:var(--red)}
+.res .info{padding:6px 12px 8px;font-size:12px;color:var(--teal);border-top:1px dashed var(--line)}
+.tbl{overflow:auto;max-height:440px}
+table.t{border-collapse:collapse;font:13px/1.4 var(--mono);width:max-content;min-width:100%}
+table.t th{position:sticky;top:0;background:var(--panel);text-align:left;padding:6px 12px;border-bottom:2px solid var(--yellow);font-weight:700}
+table.t td{padding:5px 12px;border-bottom:1px solid var(--line);white-space:pre}
+table.t td.null{color:var(--grey);font-style:italic}
+table.t td.num{text-align:right}
+.count{font-size:12px;color:var(--grey);padding:6px 12px}
+.tabs{display:flex;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--panel);z-index:2}
+.tabs button{flex:1;background:none;border:0;padding:11px 6px;font-size:13px;font-weight:600;color:var(--grey);border-bottom:3px solid transparent}
+.tabs button.on{color:var(--ink);border-bottom-color:var(--yellow)}
+.pane{padding:12px 12px 40px;font-size:13px}
+.tree{font-family:var(--mono);font-size:12.5px}
+.tree ul{list-style:none;margin:0;padding-left:14px;border-left:1px dotted var(--line)}
+.tree>ul{padding-left:0;border:0}
+.tree li{margin:1px 0}
+.tree .n{display:flex;gap:6px;align-items:center;padding:2px 4px;border-radius:5px;cursor:pointer;white-space:nowrap}
+.tree .n:hover{background:var(--soft)}
+.tree .n .sz{margin-left:auto;color:var(--grey);font-size:11px}
+.tree .n .sz.zero{color:var(--red);font-weight:700}
+.tree .n.new{background:var(--yellow-soft)}
+.tree .ic{width:14px;text-align:center;color:var(--grey)}
+.diff{background:var(--soft);border-radius:8px;padding:8px 10px;margin-bottom:10px;font-family:var(--mono);font-size:11.5px;word-break:break-all}
+.diff .a{color:var(--teal)} .diff .d{color:var(--red)}
+.meta .db{margin:0 0 14px}
+.meta .db h6{font-size:13px;margin:0 0 6px;font-family:var(--mono)}
+.meta .db h6 .cur{background:var(--yellow);color:#1d1d1b;border-radius:999px;font-size:10px;padding:1px 7px;margin-left:6px;font-family:system-ui}
+.meta .tb{border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin:6px 0}
+.meta .tb .nm{font-family:var(--mono);font-weight:700}
+.badge{font-size:10px;font-weight:700;border-radius:999px;padding:1px 7px;margin-left:6px;letter-spacing:.4px}
+.badge.ext{background:var(--teal-soft);color:var(--teal)} .badge.int{background:var(--yellow-soft);color:#7a6400}
+.badge.vue{background:var(--soft);color:var(--grey)}
+@media (prefers-color-scheme: dark){ .badge.int{color:var(--yellow)} }
+.meta .tb .loc,.meta .tb .cols{font-family:var(--mono);font-size:11px;color:var(--grey);word-break:break-all}
+.conf div{display:flex;justify-content:space-between;gap:8px;font-family:var(--mono);font-size:11.5px;padding:4px 0;border-bottom:1px solid var(--line)}
+.conf b.t{color:var(--teal)} .conf b.f{color:var(--red)}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:20;padding:20px}
+.modal.on{display:flex}
+.modal .box{background:var(--panel);border-radius:14px;max-width:900px;width:100%;max-height:85vh;display:flex;flex-direction:column;overflow:hidden}
+.modal .box .h{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:13px}
+.modal .box .h .x{margin-left:auto}
+.modal pre{margin:0;padding:14px 16px;overflow:auto;font:13px/1.5 var(--mono)}
+.home .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:20px 0}
+.home .grid .card{cursor:pointer}
+.home .grid .card:hover{border-color:var(--yellow)}
+.home .grid .card .n{font-size:30px;font-weight:800}
+code{font-family:var(--mono);background:var(--soft);border-radius:4px;padding:0 4px;font-size:.92em}
+pre.src{background:var(--code-bg);color:var(--code-ink);border-radius:12px;padding:14px 16px;font:13px/1.5 var(--mono);overflow:auto;max-width:100%}
+.next{margin-top:26px}
+.files .f{display:flex;gap:10px;align-items:center;padding:8px 12px;border:1px solid var(--line);border-radius:10px;margin:6px 0;cursor:pointer;background:var(--panel);max-width:640px}
+.files .f:hover{border-color:var(--yellow)}
+.files .f .sz{margin-left:auto;color:var(--grey);font-family:var(--mono);font-size:12px}
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#1d1d1b;color:#fff;border-radius:10px;padding:8px 16px;font-size:13px;display:none;z-index:30}
+@media (max-width:1100px){ .layout{grid-template-columns:220px minmax(0,1fr)} aside{display:none} aside.on{display:flex;position:fixed;right:0;top:56px;bottom:0;width:340px;z-index:6;box-shadow:-6px 0 20px rgba(0,0,0,.2)} #toggleAside{display:inline-block} }
+@media (max-width:760px){ .layout{grid-template-columns:1fr} nav{display:none} nav.on{display:block;position:fixed;left:0;top:56px;bottom:0;width:260px;z-index:6} #toggleNav{display:inline-block} main{padding:18px 16px 60px} .cards,.home .grid{grid-template-columns:1fr} header .db,header .mode,header .lt{display:none} header{gap:8px;padding:0 10px} }
+</style>
+</head>
+<body>
+<header>
+  <button class="hbtn" id="toggleNav" title="Menu">☰</button>
+  <div class="logo"><span class="b">HIVE</span> Mini-Hive<span class="lt"> · Workshop FISA A4</span></div>
+  <div class="sp"></div>
+  <span class="mode" id="mode"></span>
+  <span class="db" id="dbBadge">hive (<b>default</b>)&gt;</span>
+  <button class="hbtn" id="resetBtn" title="Vider le HDFS simulé et le Metastore">Réinitialiser</button>
+  <button class="hbtn" id="toggleAside" title="HDFS et Metastore">HDFS</button>
+</header>
+<div class="layout">
+  <nav id="nav"></nav>
+  <main id="main"></main>
+  <aside id="aside">
+    <div class="tabs"><button data-t="hdfs" class="on">HDFS</button><button data-t="meta">Metastore</button><button data-t="conf">Config</button></div>
+    <div class="pane" id="pane"></div>
+  </aside>
+</div>
+<div class="modal" id="modal"><div class="box"><div class="h"><span id="mTitle"></span><button class="btn light x" id="mClose">Fermer</button></div><pre id="mBody"></pre></div></div>
+<div class="toast" id="toast"></div>
+<script>
+const $ = (s, el=document) => el.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+let C = null, STATE = null, PREV = new Set(), NEWP = new Set(), DIFF = null, TAB = "hdfs", ROUTE = "home";
+const done = new Set();
+const OPEN = new Set(["/", "/user", "/user/hive", "/user/hive/warehouse", "/user/hive/data"]);
+
+async function api(path, body){
+  const r = await fetch(path, body === undefined ? {} : {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(body)});
+  return r.json();
+}
+function toast(t){ const el=$("#toast"); el.textContent=t; el.style.display="block"; clearTimeout(el._t); el._t=setTimeout(()=>el.style.display="none",2600); }
+
+function fmt(v){
+  if (v === null || v === undefined) return "NULL";
+  return String(v);
+}
+function renderResult(r){
+  const head = `<div class="h"><span>${esc(r.db||"")}&gt;</span><span class="s">${esc((r.stmt||"").replace(/\s+/g," "))}</span><span>${r.elapsed!==undefined? r.elapsed+" s":""}</span></div>`;
+  let body = "";
+  if (r.kind === "error") body = `<pre>${esc(r.message)}</pre>`;
+  else if (r.kind === "table") {
+    const rows = r.rows || [];
+    body = `<div class="tbl"><table class="t"><thead><tr>${r.columns.map(c=>`<th>${esc(c)}</th>`).join("")}</tr></thead><tbody>` +
+      rows.slice(0,500).map(row => "<tr>"+row.map(v => `<td class="${v===null?"null":(/^-?\d+(\.\d+)?$/.test(v)?"num":"")}">${esc(fmt(v))}</td>`).join("")+"</tr>").join("") +
+      `</tbody></table></div><div class="count">${rows.length} ligne(s)${rows.length>500?" · 500 affichées":""}</div>`;
+  } else body = `<pre>${esc(r.message)}</pre>`;
+  const info = (r.info||[]).length ? `<div class="info">${r.info.map(i=>"· "+esc(i)).join("<br>")}</div>` : "";
+  const src = r.source ? `<pre class="src" style="border-radius:0;margin:0">${esc(r.source)}</pre>` : "";
+  return `<div class="res ${r.kind==="error"?"err":""}">${head}${src}${body}${info}</div>`;
+}
+
+async function run(sql, out, stepId){
+  out.innerHTML = `<div class="count">Exécution…</div>`;
+  const d = await api("/api/run", {sql});
+  out.innerHTML = d.results.map(renderResult).join("") || `<div class="count">Rien à exécuter.</div>`;
+  if (stepId && d.results.length && !d.results.some(r=>r.kind==="error")) done.add(stepId);
+  await refresh(true);
+  renderNav();
+}
+
+function flatPaths(n, acc){ acc.add(n.path + (n.dir?"/":"")); (n.children||[]).forEach(c=>flatPaths(c, acc)); return acc; }
+async function refresh(trackDiff){
+  STATE = await api("/api/state");
+  const cur = flatPaths(STATE.hdfs, new Set());
+  if (trackDiff){
+    const added = [...cur].filter(p=>!PREV.has(p)), removed = [...PREV].filter(p=>!cur.has(p));
+    NEWP = new Set(added); DIFF = (added.length||removed.length) ? {added, removed} : null;
+    added.forEach(p => { const parts=p.replace(/\/$/,"").split("/"); for(let i=1;i<parts.length;i++) OPEN.add(parts.slice(0,i).join("/")||"/"); });
+  }
+  PREV = cur;
+  $("#dbBadge").innerHTML = `hive (<b>${esc(STATE.meta.current)}</b>)&gt;`;
+  renderAside();
+}
+
+function renderAside(){
+  document.querySelectorAll(".tabs button").forEach(b=>b.classList.toggle("on", b.dataset.t===TAB));
+  const pane = $("#pane");
+  if (!STATE) return;
+  if (TAB === "hdfs"){
+    let diff = "";
+    if (DIFF){
+      const f = p => esc(p.replace(/\/$/,""));
+      diff = `<div class="diff"><b>Dernière exécution</b><br>${DIFF.added.slice(0,8).map(p=>`<span class="a">+ ${f(p)}</span>`).join("<br>")}${DIFF.added.length>8?`<br>… +${DIFF.added.length-8}`:""}${DIFF.added.length&&DIFF.removed.length?"<br>":""}${DIFF.removed.slice(0,8).map(p=>`<span class="d">− ${f(p)}</span>`).join("<br>")}</div>`;
+    }
+    pane.innerHTML = diff + `<div class="tree"><ul>${treeNode(STATE.hdfs)}</ul></div><p style="color:var(--grey);font-size:12px;margin-top:14px">Cliquez sur un fichier pour voir son contenu. Dossier réel : <code>${esc(C.hdfs_dir)}</code></p>`;
+    pane.querySelectorAll("[data-p]").forEach(el => el.onclick = e => {
+      e.stopPropagation(); const p = el.dataset.p;
+      if (el.dataset.d === "1"){ OPEN.has(p) ? OPEN.delete(p) : OPEN.add(p); renderAside(); }
+      else showFile(p);
+    });
+  } else if (TAB === "meta"){
+    pane.innerHTML = `<div class="meta">` + STATE.meta.databases.map(db => `<div class="db"><h6>${esc(db.name)}${db.name===STATE.meta.current?'<span class="cur">courante</span>':""}</h6>
+      <div style="font-family:var(--mono);font-size:11px;color:var(--grey);margin-bottom:4px">${esc(db.location)}</div>
+      ${db.tables.length? db.tables.map(t => `<div class="tb"><span class="nm">${esc(t.name)}</span><span class="badge ${t.kind==="externe"?"ext":t.kind==="interne"?"int":"vue"}">${t.kind.toUpperCase()}</span>
+        ${t.location?`<div class="loc">${esc(t.location)}</div>`:""}
+        <div class="cols">${t.columns.map(c=>esc(c[0])).join(", ")}${t.partitions.length?` · <b>partition</b> ${t.partitions.map(c=>esc(c[0])).join(", ")}`:""}${t.bucket?` · <b>${t.bucket.n} buckets</b> sur ${esc(t.bucket.col)}`:""}${t.skip_header?" · en-tête ignorée":""}</div></div>`).join("") : `<div style="color:var(--grey)">aucune table</div>`}</div>`).join("") + `</div>`;
+  } else {
+    pane.innerHTML = `<div class="conf"><p style="margin-top:0;color:var(--grey)">Propriétés de session (SET) utiles au workshop :</p>` +
+      Object.entries(STATE.meta.conf).map(([k,v]) => `<div><span>${esc(k)}</span><b class="${v==="true"||v==="nonstrict"?"t":"f"}">${esc(v)}</b></div>`).join("") + `</div>`;
+  }
+}
+function treeNode(n){
+  const isOpen = OPEN.has(n.path);
+  const isNew = NEWP.has(n.path + (n.dir?"/":""));
+  if (n.dir){
+    const kids = (n.children||[]);
+    return `<li><div class="n ${isNew?"new":""}" data-p="${esc(n.path)}" data-d="1"><span class="ic">${isOpen?"▾":"▸"}</span>📁 ${esc(n.name)}${kids.length?"":` <span class="sz">vide</span>`}</div>${isOpen && kids.length?`<ul>${kids.map(treeNode).join("")}</ul>`:""}</li>`;
+  }
+  return `<li><div class="n ${isNew?"new":""}" data-p="${esc(n.path)}" data-d="0"><span class="ic"></span>📄 ${esc(n.name)}<span class="sz ${n.size===0?"zero":""}">${n.size} o</span></div></li>`;
+}
+async function showFile(p){
+  const d = await api("/api/cat?path="+encodeURIComponent(p));
+  $("#mTitle").textContent = d.error ? p : `${d.path} · ${d.size} octets`;
+  $("#mBody").textContent = d.error ? d.error : (d.lines.join("\n") || "(fichier vide : 0 octet)") + (d.truncated?"\n…":"");
+  $("#modal").classList.add("on");
+}
+async function showLocal(name){
+  const d = await api("/api/local?name="+encodeURIComponent(name));
+  $("#mTitle").textContent = `donnees/${d.name} · ${d.size} octets${d.crlf?" · fins de ligne Windows (CRLF)":""}`;
+  $("#mBody").textContent = d.lines.join("\n");
+  $("#modal").classList.add("on");
+}
+
+function renderNav(){
+  const nav = $("#nav");
+  let h = `<a href="#home" class="${ROUTE==="home"?"on":""}"><span class="id">◆</span>Accueil</a>`;
+  for (const p of C.parts){
+    h += `<h4>${esc(p.title)}</h4>`;
+    for (const s of C.steps.filter(s=>s.part===p.id))
+      h += `<a href="#s/${s.id}" class="${ROUTE==="s/"+s.id?"on":""}"><span class="id">${s.id}</span>${esc(s.title)}${done.has(s.id)?'<span class="ok">✓</span>':""}</a>`;
+    if (p.id === "p3") for (const q of C.questions)
+      h += `<a href="#q/${q.n}" class="${ROUTE==="q/"+q.n?"on":""}"><span class="id">Q${q.n}</span>${esc(q.title)}${done.has("q"+q.n)?'<span class="ok">✓</span>':""}</a>`;
+  }
+  h += `<h4>Outils</h4><a href="#console" class="${ROUTE==="console"?"on":""}"><span class="id">&gt;_</span>Console libre</a>
+        <a href="#fichiers" class="${ROUTE==="fichiers"?"on":""}"><span class="id">📄</span>Fichiers fournis</a>`;
+  if (!C.student) h += `<a href="#python" class="${ROUTE==="python"?"on":""}"><span class="id">py</span>Analyse en Python pur</a>`;
+  nav.innerHTML = h;
+}
+
+function editorBlock(id, code, label){
+  const lines = Math.min(Math.max((code||"").split("\n").length + 1, 5), 26);
+  return `<div class="editor"><div class="bar"><span class="t">${esc(label||"HiveQL")}</span><span>Ctrl+Entrée pour exécuter</span>
+    <button class="btn run" data-run="${id}">▶ Exécuter</button></div><textarea id="${id}" rows="${lines}" spellcheck="false">${esc(code||"")}</textarea></div><div class="results" id="${id}-out"></div>`;
+}
+function wireEditors(stepId){
+  document.querySelectorAll("textarea").forEach(ta => {
+    ta.addEventListener("keydown", e => {
+      if ((e.ctrlKey||e.metaKey) && e.key === "Enter"){ e.preventDefault(); run(ta.value, $("#"+ta.id+"-out"), stepId); }
+      if (e.key === "Tab"){ e.preventDefault(); const s=ta.selectionStart; ta.value = ta.value.slice(0,s)+"  "+ta.value.slice(ta.selectionEnd); ta.selectionStart=ta.selectionEnd=s+2; }
+    });
+  });
+  document.querySelectorAll("[data-run]").forEach(b => b.onclick = () => { const id=b.dataset.run; run($("#"+id).value, $("#"+id+"-out"), stepId); });
+}
+function catchUpButton(id){
+  return `<button class="btn light" id="catchup" title="Repart de zéro et exécute toutes les étapes avant celle-ci">↺ Rattraper : rejouer les étapes précédentes</button>`;
+}
+function wireCatchUp(id){
+  const b = $("#catchup"); if (!b) return;
+  b.onclick = async () => { b.disabled = true; b.textContent = "Rejeu en cours…"; await api("/api/replay", {upto:id});
+    let before = true; C.steps.forEach(s => { if (s.id === id) before = false; if (before) done.add(s.id); });
+    await refresh(true); renderNav(); b.disabled = false; b.textContent = "↺ Rattraper : rejouer les étapes précédentes"; toast("État reconstruit jusqu'à l'étape " + id); };
+}
+
+function nextLink(route){
+  const order = ["home", ...C.steps.map(s=>"s/"+s.id), ...C.questions.map(q=>"q/"+q.n), "console"];
+  const i = order.indexOf(route); if (i < 0 || i === order.length-1) return "";
+  const nxt = order[i+1]; let label = "Console libre";
+  if (nxt.startsWith("s/")) { const s = C.steps.find(x=>"s/"+x.id===nxt); label = `${s.id} · ${s.title}`; }
+  if (nxt.startsWith("q/")) { const q = C.questions.find(x=>"q/"+x.n===nxt); label = `Q${q.n} · ${q.title}`; }
+  return `<div class="next"><a class="btn light" href="#${nxt}" style="text-decoration:none">Suivant : ${esc(label)} →</a></div>`;
+}
+
+function viewHome(){
+  return `<div class="home"><span class="kicker">Big Data · FISA A4</span><h1>Le workshop Hive, rejoué en Python</h1>
+  <p class="lead">Chaque étape du sujet s'exécute ici sans Cloudera : HDFS est un vrai dossier sur votre disque, le Metastore un fichier JSON, et les requêtes HiveQL sont exécutées avec les règles de lecture de Hive (CAST qui renvoie NULL, en-têtes ignorées, partitions en répertoires, buckets par hachage).</p>
+  <div class="grid">${C.parts.map(p => { const n = C.steps.filter(s=>s.part===p.id).length + (p.id==="p3"?C.questions.length:0);
+    const first = C.steps.find(s=>s.part===p.id); return `<div class="card" onclick="location.hash='#s/${first.id}'"><div class="n">${n}</div><h5>${esc(p.title)}</h5><div style="color:var(--grey);font-size:13px">${p.id==="p1"?"Bases, tables externes et internes, CTAS, LOAD DATA":p.id==="p2"?"Partitions dynamiques, buckets, pièges de HDFS":"Mise en place puis questions Q1 à Q10"}</div></div>`; }).join("")}</div>
+  <div class="watch"><b>Comment s'en servir</b><ul>
+    <li>Suivez les étapes dans l'ordre : chacune part de l'état laissé par la précédente.</li>
+    <li>Le panneau de droite montre HDFS en direct : les ajouts de la dernière exécution sont surlignés.</li>
+    <li>Perdu ? Le bouton « Rattraper » de chaque étape reconstruit l'état attendu.</li>
+    <li>Les fichiers « locaux » de la VM (<code>/home/cloudera/…</code>) sont lus dans <code>${esc(C.data_dir)}</code>.</li></ul></div>
+  <p style="color:var(--grey);font-size:13px">Ce qui n'est pas simulé : la distribution sur plusieurs nœuds, MapReduce et YARN, les temps de réponse réels. Les résultats, eux, sont ceux que Hive donne sur ces fichiers.</p></div>`;
+}
+function viewStep(s){
+  const part = C.parts.find(p=>p.id===s.part);
+  let h = `<span class="kicker">${esc(part.title)} · étape ${s.id}</span><h1>${esc(s.title)}</h1><p class="lead">${esc(s.text)}</p>`;
+  if (s.watch && s.watch.length) h += `<div class="watch"><b>À observer</b><ul>${s.watch.map(w=>`<li>${esc(w)}</li>`).join("")}</ul></div>`;
+  h += `<div class="row">${catchUpButton(s.id)}</div>`;
+  h += editorBlock("ed1", s.sql, s.sql2 ? "1 · HiveQL" : "HiveQL");
+  if (s.sql2) h += editorBlock("ed2", s.sql2, "2 · La parade");
+  return h + nextLink("s/"+s.id);
+}
+function viewQuestion(q){
+  let h = `<span class="kicker">Partie 3 · question ${q.n} / 10</span><h1>${esc(q.title)}</h1>
+    <div class="qbig"><div class="q">Q${q.n}</div><p>${esc(q.question)}</p></div>
+    <div class="cards"><div class="card"><h5>Tables utiles</h5><ul>${q.tables.map(t=>`<li><code>${esc(t)}</code></li>`).join("")}</ul></div>
+    <div class="card"><h5>Notions</h5><ul>${q.notions.map(t=>`<li>${esc(t)}</li>`).join("")}</ul></div>
+    <div class="card hint"><h5>Coup de pouce <span style="font-weight:400;color:var(--grey)">(cliquez pour révéler)</span></h5><ul class="blur" onclick="this.classList.add('show')">${q.hint.map(t=>`<li>${esc(t)}</li>`).join("")}</ul></div></div>
+    <div class="row">${catchUpButton("q"+q.n)}</div>`;
+  h += editorBlock("ed1", "USE analyse_salaires;\n\n-- Écrivez votre requête HiveQL ici\n", "HiveQL · votre réponse");
+  if (!C.student) h += `<div class="row"><button class="btn light" id="bSol">Afficher la correction</button><button class="btn light" id="bSub">Corrigé du sujet 2023</button><button class="btn light" id="bPy">Version Python pur</button></div><div id="qextra"></div>`;
+  return h + nextLink("q/"+q.n);
+}
+function wireQuestion(q){
+  wireCatchUpQ(q);
+  if (C.student) return;
+  const extra = $("#qextra");
+  const load = (code, label, cls) => {
+    $("#ed1").value = "USE analyse_salaires;\n\n" + code; $("#ed1").rows = Math.min(code.split("\n").length + 4, 26);
+    extra.innerHTML = `<div class="expected ${cls}"><b>${label}</b><br>${esc(q.expected)}</div>`;
+    run($("#ed1").value, $("#ed1-out"), "q"+q.n);
+  };
+  $("#bSol").onclick = () => load(q.solution, "Résultat attendu", "");
+  $("#bSub").onclick = () => load(q.subject, "Corrigé du sujet : à comparer avec le résultat attendu", "subject");
+  $("#bPy").onclick = async () => { const d = await api("/api/python", {n:q.n}); extra.innerHTML = `<div class="results">${renderResult(d)}</div><div class="expected"><b>Résultat attendu</b><br>${esc(q.expected)}</div>`; };
+}
+function wireCatchUpQ(q){
+  const b = $("#catchup"); if (!b) return;
+  b.onclick = async () => { b.disabled = true; b.textContent = "Rejeu en cours…"; await api("/api/replay", {});
+    C.steps.forEach(s => done.add(s.id)); await refresh(true); renderNav(); b.disabled = false;
+    b.textContent = "↺ Rattraper : rejouer les étapes précédentes"; toast("Parties 1 à 3 rejouées : la base analyse_salaires est prête"); };
+}
+function viewConsole(){
+  return `<span class="kicker dark">Console libre</span><h1>Écrire ses propres requêtes</h1>
+  <p class="lead">Instructions HiveQL séparées par « ; ». Les commandes <code>hdfs dfs …</code> s'écrivent une par ligne. Exemples : <code>SHOW DATABASES;</code>, <code>DESCRIBE FORMATTED employes;</code>, <code>hdfs dfs -ls -R /user/hive</code>.</p>` +
+  editorBlock("ed1", "SHOW DATABASES;\nSHOW TABLES;\nhdfs dfs -ls -R /user/hive/data", "HiveQL · console");
+}
+function viewFiles(){
+  return `<span class="kicker dark">Fichiers fournis</span><h1>Les fichiers du dossier donnees/</h1>
+  <p class="lead">Ce sont les fichiers « locaux » de la VM. Ils ont des fins de ligne Windows (CRLF), que Hadoop gère, et quelques accents encodés en Latin-1, que Hive affiche « � ».</p>
+  <div class="files">${C.local_files.map(f=>`<div class="f" data-f="${esc(f)}">📄 <b>${esc(f)}</b><span class="sz">voir</span></div>`).join("")}</div>`;
+}
+function viewPython(){
+  return `<span class="kicker dark">Python pur</span><h1>Les dix questions sans SQL</h1>
+  <p class="lead">Mêmes résultats que les requêtes HiveQL, avec des listes et des dictionnaires. Utile pour montrer ce que fait réellement une jointure ou un GROUP BY. Les fonctions de lecture :</p>
+  <pre class="src">${esc(C.helpers)}</pre><div class="row">${C.questions.map(q=>`<button class="btn light" data-py="${q.n}">Q${q.n}</button>`).join("")}</div><div class="results" id="pyout"></div>`;
+}
+
+function route(){
+  ROUTE = (location.hash || "#home").slice(1);
+  const main = $("#main");
+  $("#nav").classList.remove("on"); $("#aside").classList.remove("on");
+  if (ROUTE.startsWith("s/")){ const s = C.steps.find(x=>x.id===ROUTE.slice(2)); if (s){ main.innerHTML = viewStep(s); wireEditors(s.id); wireCatchUp(s.id); } }
+  else if (ROUTE.startsWith("q/")){ const q = C.questions.find(x=>String(x.n)===ROUTE.slice(2)); if (q){ main.innerHTML = viewQuestion(q); wireEditors("q"+q.n); wireQuestion(q); } }
+  else if (ROUTE === "console"){ main.innerHTML = viewConsole(); wireEditors(null); }
+  else if (ROUTE === "fichiers"){ main.innerHTML = viewFiles(); main.querySelectorAll("[data-f]").forEach(el=>el.onclick=()=>showLocal(el.dataset.f)); }
+  else if (ROUTE === "python" && !C.student){ main.innerHTML = viewPython(); main.querySelectorAll("[data-py]").forEach(b=>b.onclick=async()=>{ const d=await api("/api/python",{n:+b.dataset.py}); $("#pyout").innerHTML = renderResult(d); }); }
+  else { ROUTE = "home"; main.innerHTML = viewHome(); }
+  main.scrollTop = 0;
+  renderNav();
+}
+
+(async function init(){
+  C = await api("/api/content");
+  $("#mode").textContent = C.student ? "Mode élèves" : "Mode tuteur";
+  document.querySelectorAll(".tabs button").forEach(b => b.onclick = () => { TAB = b.dataset.t; renderAside(); });
+  $("#mClose").onclick = () => $("#modal").classList.remove("on");
+  $("#modal").onclick = e => { if (e.target.id === "modal") $("#modal").classList.remove("on"); };
+  document.addEventListener("keydown", e => { if (e.key === "Escape") $("#modal").classList.remove("on"); });
+  $("#toggleAside").onclick = () => $("#aside").classList.toggle("on");
+  $("#toggleNav").onclick = () => $("#nav").classList.toggle("on");
+  $("#resetBtn").onclick = async () => { await api("/api/reset", {}); done.clear(); NEWP = new Set(); DIFF = null; await refresh(false); route(); toast("HDFS et Metastore remis à zéro"); };
+  window.addEventListener("hashchange", route);
+  await refresh(false);
+  route();
+})();
+</script>
+</body>
+</html>
