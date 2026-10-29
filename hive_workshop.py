@@ -577,6 +577,7 @@ class MiniHive:
         self.root = os.path.abspath(root)
         self.hdfs = os.path.join(self.root, "hdfs")
         self.ms_path = os.path.join(self.root, "metastore.json")
+        self.session_path = os.path.join(self.root, "session.json")
         self.lock = threading.RLock()
         self.new_session()
         self._init_storage()
@@ -600,6 +601,28 @@ class MiniHive:
     def _save(self):
         with open(self.ms_path, "w", encoding="utf-8") as f:
             json.dump(self.ms, f, ensure_ascii=False, indent=1)
+
+    def restore_session(self):
+        """Reprend la base courante du lancement précédent (option --conserver)."""
+        try:
+            with open(self.session_path, encoding="utf-8") as f:
+                db = json.load(f).get("db", "default")
+        except (OSError, ValueError):
+            return
+        if db in self.ms["databases"]:
+            self.db = db
+
+    def _save_session(self):
+        try:
+            with open(self.session_path, "w", encoding="utf-8") as f:
+                json.dump({"db": self.db}, f)
+        except OSError:
+            pass
+
+    def is_empty(self):
+        d = self.ms["databases"]
+        return list(d) == ["default"] and not d["default"]["tables"] and not any(
+            files for _, _, files in os.walk(self.hdfs))
 
     def reset(self):
         with self.lock:
@@ -829,6 +852,7 @@ class MiniHive:
         del self.ms["databases"][name]
         if self.db == name:
             self.db = "default"
+            self._save_session()
         self._save()
         return msg("OK · base %s supprimée" % name)
 
@@ -837,6 +861,7 @@ class MiniHive:
         if name not in self.ms["databases"]:
             raise HiveError("FAILED: SemanticException [Error 10072]: Database does not exist: %s" % name)
         self.db = name
+        self._save_session()
         return msg("OK · base courante : %s" % name)
 
     def show_tables(self, s):
@@ -2292,6 +2317,8 @@ def main(argv=None):
     ap.add_argument("--port", type=int, default=8765)
     ap.add_argument("--sans-corriges", action="store_true", help="interface élèves : masque corrections et résultats attendus")
     ap.add_argument("--sans-navigateur", action="store_true", help="ne pas ouvrir le navigateur automatiquement")
+    ap.add_argument("--conserver", action="store_true",
+                    help="interface : garder le HDFS simulé et le Metastore du lancement précédent (sinon, départ à zéro)")
     a = ap.parse_args(argv)
     if hasattr(sys.stdout, "reconfigure"):
         try:
@@ -2302,6 +2329,11 @@ def main(argv=None):
         sys.exit("Dossier de données introuvable : %s (utilisez --donnees)" % a.donnees)
     engine = MiniHive(a.donnees, a.hdfs)
     if a.commande == "serve":
+        if a.conserver:
+            engine.restore_session()
+        elif not engine.is_empty():
+            engine.reset()
+            print("HDFS simulé et Metastore remis à zéro (--conserver pour reprendre l'état précédent).")
         serve(engine, a.port, a.sans_corriges, not a.sans_navigateur)
     elif a.commande == "rejouer":
         replay(engine, out=print)
@@ -2392,6 +2424,8 @@ textarea{display:block;width:100%;min-height:120px;resize:vertical;border:0;outl
 .res .h span.s{overflow:hidden;text-overflow:ellipsis;flex:1}
 .res pre{margin:0;padding:10px 14px;font:13px/1.5 var(--mono);white-space:pre-wrap;word-break:break-word}
 .res.err{border-color:var(--red)}
+.hint{margin-top:10px;padding:10px 14px;border:1px solid var(--line);border-left:4px solid var(--teal);border-radius:10px;background:var(--panel);font-size:13px;line-height:1.6}
+.hint .btn{margin:4px 2px 0}
 .res.err pre{background:var(--red-soft);color:var(--red)}
 .res .info{padding:6px 12px 8px;font-size:12px;color:var(--teal);border-top:1px dashed var(--line)}
 .tbl{overflow:auto;max-height:440px}
@@ -2506,6 +2540,11 @@ async function run(sql, out, stepId){
   out.innerHTML = `<div class="count">Exécution…</div>`;
   const d = await api("/api/run", {sql});
   out.innerHTML = d.results.map(renderResult).join("") || `<div class="count">Rien à exécuter.</div>`;
+  if (d.results.some(r => r.kind==="error" && /already exists|File exists/.test(r.message||""))) {
+    out.insertAdjacentHTML("beforeend", `<div class="hint">Cet objet existe déjà : l'étape a sans doute déjà été exécutée. L'exécution s'arrête à la première erreur, comme <code>hive -f</code>, donc les instructions suivantes n'ont pas été lancées. Pour refaire l'étape depuis un état propre : <button class="btn light" data-act="reset">Tout réinitialiser</button>${stepId && $("#catchup")?` ou <button class="btn light" data-act="catchup">Rattraper jusqu'ici</button>`:""}</div>`);
+    out.querySelector('[data-act="reset"]').onclick = () => $("#resetBtn").click();
+    const c = out.querySelector('[data-act="catchup"]'); if (c) c.onclick = () => { const b = $("#catchup"); if (b) b.click(); };
+  }
   if (stepId && d.results.length && !d.results.some(r=>r.kind==="error")) done.add(stepId);
   await refresh(true);
   renderNav();

@@ -29,11 +29,14 @@ Les fichiers ont des fins de ligne Windows (CRLF) et quelques accents en Latin-1
 
 Le fichier [`interface/index.html`](interface/index.html) contient toute l'interface : HTML, CSS et JavaScript, sans dépendance externe. Le script le sert sur http://localhost:8765 et le relit à chaque chargement de page. On peut donc le modifier et voir le résultat en rafraîchissant le navigateur. Si le dossier `interface/` est absent, le script utilise la copie intégrée dans `hive_workshop.py` : le script seul reste autonome.
 
+Chaque lancement de l'interface repart de zéro, pour que les étapes s'exécutent dans l'ordre sans tomber sur des objets créés lors d'une séance précédente. Comme `hive -f`, un bloc s'arrête à la première erreur. Si une étape échoue avec « already exists » ou « File exists », c'est qu'elle a déjà été exécutée : l'interface propose alors « Tout réinitialiser » ou « Rattraper jusqu'ici ».
+
 ## Commandes
 
 | Commande | Effet |
 |---|---|
-| `python3 hive_workshop.py` | Interface web |
+| `python3 hive_workshop.py` | Interface web, en repartant d'un HDFS et d'un Metastore vides |
+| `python3 hive_workshop.py serve --conserver` | Interface web, en reprenant l'état et la base courante du lancement précédent |
 | `python3 hive_workshop.py rejouer` | Rejoue toutes les étapes dans le terminal |
 | `python3 hive_workshop.py console` | Invite `hive>` interactive, comme le Hive CLI |
 | `python3 hive_workshop.py sql "SHOW DATABASES;"` | Exécute des instructions puis quitte |
